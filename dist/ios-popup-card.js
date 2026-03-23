@@ -1579,6 +1579,7 @@ class IOSPopupCard extends HTMLElement {
   }
 
   setConfig(config) {
+    console.info("iOS Popup Card: setConfig called", config);
     if (!config) throw new Error("Configuration invalide");
     if (!config.hash) throw new Error("'hash' est requis (ex: hash: salon)");
 
@@ -1642,6 +1643,7 @@ class IOSPopupCard extends HTMLElement {
     window.addEventListener("hashchange", this._boundHashHandler);
     window.addEventListener("location-changed", this._boundLocationHandler);
     window.addEventListener("popstate", this._boundHashHandler);
+    console.info("iOS Popup Card: connectedCallback");
     requestAnimationFrame(() => {
       this._detectContext();
       this._onHashChange();
@@ -2120,6 +2122,14 @@ class IOSPopupCard extends HTMLElement {
     }
 
     const cfg = this._config;
+    const iconBackground = (cfg.icon_background !== undefined && cfg.icon_background !== null) ? cfg.icon_background : "rgba(255,255,255,0.06)";
+    const headerTextColor = cfg.header_text_color || "var(--primary-text-color, #fff)";
+    const iconColor = cfg.icon_color || "var(--primary-text-color)";
+
+    const _borderParts = String(cfg.border_radius || '').split(/\s+/).filter(Boolean);
+    const _topLeftRadius = _borderParts[0] || '0';
+    const _topRightRadius = _borderParts[1] || _borderParts[0] || '0';
+
     const overlay = document.createElement("div");
     overlay.className = "ios-popup-overlay";
     this._overlay = overlay;
@@ -2156,9 +2166,7 @@ class IOSPopupCard extends HTMLElement {
           width: 100%;
           max-width: ${cfg.max_width};
           max-height: ${cfg.max_height};
-          overflow-y: auto;
-          overscroll-behavior: contain;
-          -webkit-overflow-scrolling: touch;
+          overflow: hidden;
           background: ${cfg.popup_background};
           backdrop-filter: blur(${cfg.blur_strength}px) saturate(190%);
           -webkit-backdrop-filter: blur(${cfg.blur_strength}px) saturate(190%);
@@ -2171,6 +2179,8 @@ class IOSPopupCard extends HTMLElement {
           transform: translateY(100%);
           animation: ios-sheetIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           will-change: transform;
+          display: flex;
+          flex-direction: column;
         }
         @keyframes ios-sheetIn {
           from { transform: translateY(100%); }
@@ -2197,6 +2207,16 @@ class IOSPopupCard extends HTMLElement {
           width: 36px; height: 5px;
           border-radius: 100px;
           background: rgba(255,255,255,0.28);
+        }
+        .ios-top {
+          position: relative;
+          z-index: 3;
+          background: transparent;
+          backdrop-filter: none;
+          -webkit-backdrop-filter: none;
+          overflow: hidden;
+          border-top-left-radius: ${_topLeftRadius};
+          border-top-right-radius: ${_topRightRadius};
         }
         .ios-header {
           display: ${cfg.show_header ? "flex" : "none"};
@@ -2312,35 +2332,44 @@ class IOSPopupCard extends HTMLElement {
           margin: 0 16px 4px 16px;
         }
         .ios-content {
+          flex: 1;
+          min-height: 0;
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch;
           padding: 4px 12px 12px 12px;
           display: flex;
           flex-direction: column;
           gap: 12px;
         }
+        .ios-content::-webkit-scrollbar { display: none; }
+        .ios-content { scrollbar-width: none; }
       </style>
 
       <div class="ios-scrim"></div>
       <div class="ios-sheet">
-        <div class="ios-handle-area">
-          <div class="ios-handle"></div>
-        </div>
-        <div class="ios-header">
-          <div class="ios-header-left">
-            ${cfg.icon ? '<div class="ios-header-icon"><ha-icon icon="' + cfg.icon + '"></ha-icon></div>' : ""}
-            <div>
-              <div class="ios-header-title">${cfg.title}</div>
-              ${cfg.subtitle ? '<div class="ios-header-sub">' + cfg.subtitle + "</div>" : ""}
+        <div class="ios-top">
+          <div class="ios-handle-area">
+            <div class="ios-handle"></div>
+          </div>
+          <div class="ios-header">
+            <div class="ios-header-left">
+              ${cfg.icon ? '<div class="ios-header-icon"><ha-icon icon="' + cfg.icon + '"></ha-icon></div>' : ""}
+              <div>
+                <div class="ios-header-title">${cfg.title}</div>
+                ${cfg.subtitle ? '<div class="ios-header-sub">' + cfg.subtitle + "</div>" : ""}
+              </div>
+            </div>
+            <div class="ios-header-right">
+              ${cfg.sub_btn_1_icon && this._hasUiAction(cfg.sub_btn_1_tap_action || this._targetToAction(cfg.sub_btn_1_tap_target || cfg.sub_btn_1_target)) ? '<button class="ios-sub-btn" data-slot="1"><ha-icon icon="' + cfg.sub_btn_1_icon + '"></ha-icon>' + (cfg.sub_btn_1_badge ? '<span class="ios-sub-badge">' + cfg.sub_btn_1_badge + '</span>' : '') + '</button>' : ""}
+              ${cfg.sub_btn_2_icon && this._hasUiAction(cfg.sub_btn_2_tap_action || this._targetToAction(cfg.sub_btn_2_tap_target || cfg.sub_btn_2_target)) ? '<button class="ios-sub-btn" data-slot="2"><ha-icon icon="' + cfg.sub_btn_2_icon + '"></ha-icon>' + (cfg.sub_btn_2_badge ? '<span class="ios-sub-badge">' + cfg.sub_btn_2_badge + '</span>' : '') + '</button>' : ""}
+              <button class="ios-close">
+                <svg viewBox="0 0 14 14"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
+              </button>
             </div>
           </div>
-          <div class="ios-header-right">
-            ${cfg.sub_btn_1_icon && this._hasUiAction(cfg.sub_btn_1_tap_action || this._targetToAction(cfg.sub_btn_1_tap_target || cfg.sub_btn_1_target)) ? '<button class="ios-sub-btn" data-slot="1"><ha-icon icon="' + cfg.sub_btn_1_icon + '"></ha-icon>' + (cfg.sub_btn_1_badge ? '<span class="ios-sub-badge">' + cfg.sub_btn_1_badge + '</span>' : '') + '</button>' : ""}
-            ${cfg.sub_btn_2_icon && this._hasUiAction(cfg.sub_btn_2_tap_action || this._targetToAction(cfg.sub_btn_2_tap_target || cfg.sub_btn_2_target)) ? '<button class="ios-sub-btn" data-slot="2"><ha-icon icon="' + cfg.sub_btn_2_icon + '"></ha-icon>' + (cfg.sub_btn_2_badge ? '<span class="ios-sub-badge">' + cfg.sub_btn_2_badge + '</span>' : '') + '</button>' : ""}
-            <button class="ios-close">
-              <svg viewBox="0 0 14 14"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
-            </button>
-          </div>
+          <div class="ios-sep"></div>
         </div>
-        <div class="ios-sep"></div>
         <div class="ios-content"></div>
       </div>
     `;
