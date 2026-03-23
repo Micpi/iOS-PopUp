@@ -1,5 +1,5 @@
 {
-    "name": "iOS PopUp",
-    "homeassistant": "3.0.0",
-    "render_readme": true
+    "name": "iOS PopUp Card",
+    "render_as_panel": false,
+    "type": "layout"
 }
