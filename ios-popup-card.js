@@ -801,6 +801,8 @@ class IOSPopupCardEditor extends HTMLElement {
         subtitle: this._config.subtitle || "",
         icon: this._config.icon || "",
         icon_color: this._config.icon_color || "",
+        header_text_color: this._config.header_text_color || "",
+        icon_background: this._config.icon_background || "",
         show_header: this._config.show_header !== false,
         show_handle: this._config.show_handle !== false,
         show_close: this._config.show_close !== false,
@@ -820,6 +822,8 @@ class IOSPopupCardEditor extends HTMLElement {
         { name: "subtitle", label: "Sous-titre", selector: { text: {} } },
         { name: "icon", label: "Icône", selector: { icon: {} } },
         { name: "icon_color", label: "Couleur de l'icône", selector: { text: {} } },
+        { name: "header_text_color", label: "Couleur du texte de l'en-tête", selector: { text: {} } },
+        { name: "icon_background", label: "Fond de l'icône (CSS, ex: none)", selector: { text: {} } },
         { name: "show_header", label: "Afficher le header", selector: { boolean: {} } },
         { name: "show_handle", label: "Afficher le grab handle", selector: { boolean: {} } },
         { name: "show_close", label: "Afficher le bouton fermer", selector: { boolean: {} } },
@@ -1591,6 +1595,8 @@ class IOSPopupCard extends HTMLElement {
       subtitle: config.subtitle || "",
       icon: config.icon || "mdi:dots-horizontal",
       icon_color: config.icon_color || "var(--primary-text-color)",
+      icon_background: pickCss(config.icon_background, "rgba(255,255,255,0.06)"),
+      header_text_color: pickCss(config.header_text_color, "var(--primary-text-color, #fff)"),
       cards: config.cards || [],
       popup_background: pickCss(config.popup_background, "rgba(28, 28, 30, 0.92)"),
       scrim_background: pickCss(config.scrim_background, "rgba(0, 0, 0, 0.4)"),
@@ -1711,6 +1717,8 @@ class IOSPopupCard extends HTMLElement {
     const cfg = this._config;
     const cardCount = (cfg.cards || []).length;
     const iconColor = cfg.icon_color || "var(--primary-text-color)";
+    const iconBackground = (cfg.icon_background !== undefined && cfg.icon_background !== null) ? cfg.icon_background : "rgba(255,255,255,0.06)";
+    const headerTextColor = cfg.header_text_color || "var(--primary-text-color, #fff)";
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -1773,7 +1781,7 @@ class IOSPopupCard extends HTMLElement {
           width: 36px;
           height: 36px;
           border-radius: 10px;
-          background: rgba(255,255,255,0.06);
+          background: ${iconBackground};
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1786,7 +1794,7 @@ class IOSPopupCard extends HTMLElement {
         .preview-title {
           font-size: 18px;
           font-weight: 700;
-          color: var(--primary-text-color, #fff);
+          color: ${headerTextColor};
           letter-spacing: -0.4px;
           line-height: 1.2;
         }
@@ -2205,7 +2213,7 @@ class IOSPopupCard extends HTMLElement {
         .ios-header-icon {
           width: 36px; height: 36px;
           border-radius: 10px;
-          background: rgba(255,255,255,0.06);
+          background: ${iconBackground};
           display: flex;
           align-items: center;
           justify-content: center;
@@ -2217,7 +2225,7 @@ class IOSPopupCard extends HTMLElement {
         }
         .ios-header-title {
           font-size: 20px; font-weight: 700;
-          color: var(--primary-text-color, #fff);
+          color: ${headerTextColor};
           letter-spacing: -0.4px;
           line-height: 1.2;
         }
