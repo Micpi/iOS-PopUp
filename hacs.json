@@ -1,5 +1,6 @@
 {
-    "name": "iOS PopUp Card",
+    "name": "Mon iOS PopUp",
     "render_as_panel": false,
-    "type": "layout"
+    "type": "plugin",
+    "filename": "ios-popup-card.js"
 }
